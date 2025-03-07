@@ -5,8 +5,9 @@ Thumbs.db
 # Ignore sensitive files
 .env
 config.php
+ExerciseData.txt
 
-# Ignore dependencies
+# Ignore dependencies (optional, for future use with Composer)
 vendor/
 composer.lock
 
@@ -20,5 +21,14 @@ session/
 .idea/
 .vscode/
 
-# Ignore uploads (optional)
+# Ignore temporary and backup files
+*.bak
+*.tmp
+*.swp
+
+# Ignore uploads (optional, if you add file uploads later)
 uploads/
+
+# Ignore testing/output files (optional, if you create any)
+test_output/
+*.out

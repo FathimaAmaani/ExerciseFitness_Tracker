@@ -1,39 +1,21 @@
 <?php
 include 'config.php';
-include 'fileio.php';
-include 'common.php';
+include 'data_api.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: login.php');
     exit;
 }
 
-// Load current data from file
-$defaultData = LoadDefaultData();
-if (count($defaultData) == 4) {
-    $startHeight = $defaultData[0];
-    $startWeight = $defaultData[1];
-} else {
-    $startHeight = '';
-    $startWeight = '';
-}
-
-// Handle unit change
-if (isset($_POST['set_units'])) {
-    $_SESSION['units'] = $_POST['units'];
-}
-
-// Handle data submission
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
-    $height = floatval(trim($_POST['height']));
-    $weight = floatval(trim($_POST['weight']));
-    $bmi = ($_SESSION['units'] == "KG") ? BMICalculator($weight, $height) : BMICalculatorWeightInPounds($weight, $height);
-    $units = $_SESSION['units'];
-    if (InsertNewUserData($height, $weight, $bmi, $units)) {
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['add'])) {
+    $activity = trim($_POST['activity']);
+    $met = floatval($_POST['met']);
+    if (!empty($activity) && $met > 0 && !in_array($activity, array_column($_SESSION['listOfActivities'], 'Activity'))) {
+        AddNewActivity($activity, $met);
         header('Location: main.php');
         exit;
     } else {
-        echo "Error saving data.";
+        echo "Invalid input or activity already exists.";
     }
 }
 ?>
@@ -43,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enter/Update Data - Fitness Tracker</title>
+    <title>Add Activity - Fitness Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; }
@@ -79,25 +61,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
         </div>
     </nav>
     <div class="container mt-5">
-        <h1>Enter/Update Your Data</h1>
+        <h1>Add New Activity</h1>
         <form method="post" class="mt-4">
             <div class="mb-3">
-                <label for="units" class="form-label">Units</label>
-                <select class="form-select" id="units" name="units" onchange="this.form.submit()">
-                    <option value="KG" <?php echo $_SESSION['units'] == "KG" ? "selected" : ""; ?>>KG</option>
-                    <option value="LBS" <?php echo $_SESSION['units'] == "LBS" ? "selected" : ""; ?>>LBS</option>
-                </select>
-                <input type="hidden" name="set_units" value="1">
+                <label for="activity" class="form-label">Activity Name</label>
+                <input type="text" class="form-control" id="activity" name="activity" required>
             </div>
             <div class="mb-3">
-                <label for="height" class="form-label">Height (m)</label>
-                <input type="number" step="0.01" class="form-control" id="height" name="height" value="<?php echo htmlspecialchars($startHeight); ?>" required>
+                <label for="met" class="form-label">MET Value</label>
+                <input type="number" step="0.1" class="form-control" id="met" name="met" required min="0.1">
             </div>
-            <div class="mb-3">
-                <label for="weight" class="form-label">Weight (<?php echo $_SESSION['units']; ?>)</label>
-                <input type="number" step="0.01" class="form-control" id="weight" name="weight" value="<?php echo htmlspecialchars($startWeight); ?>" required>
-            </div>
-            <button type="submit" name="save" class="btn btn-custom text-white">Save</button>
+            <button type="submit" name="add" class="btn btn-custom text-white">Add</button>
             <a href="main.php" class="btn btn-secondary">Cancel</a>
         </form>
     </div>

@@ -1,156 +1,161 @@
 <?php
+// common.php
+define('POUND_TO_KILO_RATIO', 2.2);
+define('CALORIES_IN_A_KILO', 7700);
 
-/**
- * An API function that will convert weight from kilograms to pounds
- * @param float $weightInKilos Weight in kilograms
- * @return float Weight in pounds rounded to 2 decimal places
- * RETURNS Weight in pounds rounded to 2 decimal places
- */
+/** Existing Functions (Updated with Rounding) **/
 function KilosToPounds($weightInKilos) {
-    return round($weightInKilos * 2.2, 2);
+    return round($weightInKilos * POUND_TO_KILO_RATIO, 2);
 }
 
-/**
- * An API function that will calculate Body Mass Index (BMI) using weight and height
- * @param float $weightInKilos Weight in kilograms
- * @param float $height Height in meters
- * @return float BMI value rounded to 2 decimal places
- * RETURNS BMI value rounded to 2 decimal places
- */
+function PoundsToKilos($weightInPounds) {
+    return round($weightInPounds / POUND_TO_KILO_RATIO, 2);
+}
+
 function BMICalculator($weightInKilos, $height) {
     return round($weightInKilos / ($height * $height), 2);
 }
 
-/**
- * An API function that will calculate calories burned during 60 minutes of activity
- * @param float $METvalue Metabolic Equivalent of Task value for the activity
- * @param float $weightInKilos Weight of person in kilograms
- * @return float Total calories burned in 60 minutes
- * RETURNS the total calories burned in 60 minutes rounded to 2 decimal places
- */
-
 function CaloriesBurnedIn60Minutes($METvalue, $weightInKilos) {
-    return $METvalue * $weightInKilos;
+    return round($METvalue * $weightInKilos, 2);
 }
 
-/**
- * An API function that will calculate calories burned during 30 minutes of activity
- * @param float $METvalue Metabolic Equivalent of Task value for the activity
- * @param float $weightInKilos Weight of person in kilograms
- * @return float Total calories burned in 30 minutes
- * RETURNS the total calories burned in 30 minutes rounded to 2 decimal places
- */
 function CaloriesBurnedIn30Minutes($METvalue, $weightInKilos) {
-    return CaloriesBurnedIn60Minutes($METvalue, $weightInKilos) / 2;
+    return round(CaloriesBurnedIn60Minutes($METvalue, $weightInKilos) / 2, 2);
 }
 
-/**
- * An API function that will calculate potential weight loss in kilograms for 30 minutes of activity
- * @param float $METvalue Metabolic Equivalent of Task value for the activity
- * @param float $weightInKilos Weight of person in kilograms
- * @return float Weight loss in kilograms rounded to 2 decimal places
- * RETURNS the weight loss in kilograms rounded to 2 decimal places
-*/
 function WeightLostInKilosIn30Minutes($METvalue, $weightInKilos) {
     $caloriesBurned = CaloriesBurnedIn30Minutes($METvalue, $weightInKilos);
-    return round($caloriesBurned / 7700, 2); // 7700 calories per kg
+    return round($caloriesBurned / CALORIES_IN_A_KILO, 4); // Higher precision for small values
 }
 
-/**API Extension Code for Learners:
-    INSERT API CODE 
-    Add functions to enhance functionality as per project scenario
-*/
+/** Extended Functions **/
+// Calories burned in 15 minutes
+function CaloriesBurnedIn15Minutes($METvalue, $weightInKilos) {
+    return round(CaloriesBurnedIn30Minutes($METvalue, $weightInKilos) / 2, 2);
+}
 
-/**Calories Burned (15 minutes, custom time)
-============================================
-Ext_API_01: An API function that will calculate calories burned during 15 minutes of activity
-
-Ext_API_02: An API function that will calculate calories burned for custom durations
-
+// Calories burned in custom time
 function CaloriesBurnedInCustomTime($METvalue, $weightInKilos, $minutes) {
-    return $METvalue * $weightInKilos * ($minutes / 60);
-}
-**/
-
-/**weight lost in kilos (15 minutes, 60 minutes, custom time)
-============================================
-Ext_API_03: An API function that will calculate potential weight loss in kilograms for 15 minutes of activity
-
-Ext_API_04: An API function that will calculate potential weight loss in kilograms for 60 minutes of activity
-
-Ext_API_05: An API function that will calculate potential weight loss in kilograms for custom minutes of activity
-
-
-/**weight lost in pounds (15 minutes, 30 minutes, 60 minutes, custom time)
-============================================
-Ext_API_06: An API function that will calculate potential weight loss in pounds for 15 minutes of activity
-
-Ext_API_07: An API function that will calculate potential weight loss in pounds for 30 minutes of activity
-
-Ext_API_08: An API function that will calculate potential weight loss in pounds for 60 minutes of activity
-
-Ext_API_09: An API function that will calculate potential weight loss in pounds for custom minutes of activity
-
-
-/**Calories loss for a weight in pounds (15 minutes, 30 minutes, 60 minutes, custom time)
-============================================
-Ext_API_10: An API function that will calculate calories lost in pounds during 15 minutes of activity
-
-Ext_API_11: An API function that will calculate calories lost in pounds during 30 minutes of activity
-
-Ext_API_12: An API function that will calculate calories lost in pounds during 60 minutes of activity
-
-Ext_API_13: An API function that will calculate calories lost in pounds during custom minutes of activity
-
-
-/**BMI calculator that uses a starting weight in pounds
-============================================
-Ext_API_14: An API function that will calculate Body Mass Index (BMI) using weight and height in pounds
-
-
-/** average calories burned over all activities 
-============================================
-Ext_API_15: An API function that will calculate average calories burned over all activities
-
-
-/**  largest amount of calories burned 
-============================================
-Ext_API_16: An API function that will calculate largest amount of calories burned
-
-
-/**  biggest weight loss interval between activities.
-============================================
-Ext_API_17: An API function that will calculate biggest weight loss interval between activities
-
-
-/**Online API Extension Services:
-    INSERT API CODE 
-    Add functions to enhance functionality as per project scenario
-
-
-/**  kilos to pounds 
-============================================
-Ext_API_18: An API function that will calculate kilos to pounds using online service API 
-// Online API integration (hypothetical example)
-function kilosToPoundsWebService($weightInKilos) {
-    // Replace with real API call, e.g., using curl
-    // $response = file_get_contents("https://api.example.com/convert?from=kg&to=lbs&value=$weightInKilos");
-    // $data = json_decode($response, true);
-    // return $data['value'];
-    return kilosToPounds($weightInKilos); // Simulated
+    $hours = $minutes / 60;
+    return round($METvalue * $weightInKilos * $hours, 2);
 }
 
-/**  pounds to kilos 
-============================================
-Ext_API_19: An API function that will calculate pounds to kilos using online service API 
-
-/**  BMI calculations.  
-============================================
-Ext_API_20: An API function that will calculate BMI calculations using online service API 
-function bmiCalculatorWebService($weightInKilos, $height) {
-    // Simulated API call
-    return bmiCalculator($weightInKilos, $height);
+// Weight lost in kilos for 15 minutes
+function WeightLostInKilosIn15Minutes($METvalue, $weightInKilos) {
+    $calories = CaloriesBurnedIn15Minutes($METvalue, $weightInKilos);
+    return round($calories / CALORIES_IN_A_KILO, 4);
 }
-*/
 
+// Weight lost in kilos for 60 minutes
+function WeightLostInKilosIn60Minutes($METvalue, $weightInKilos) {
+    $calories = CaloriesBurnedIn60Minutes($METvalue, $weightInKilos);
+    return round($calories / CALORIES_IN_A_KILO, 4);
+}
+
+// Weight lost in kilos for custom time
+function WeightLostInKilosInCustomTime($METvalue, $weightInKilos, $minutes) {
+    $calories = CaloriesBurnedInCustomTime($METvalue, $weightInKilos, $minutes);
+    return round($calories / CALORIES_IN_A_KILO, 4);
+}
+
+// Weight lost in pounds
+function WeightLostInPoundsIn15Minutes($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return KilosToPounds(WeightLostInKilosIn15Minutes($METvalue, $weightInKilos));
+}
+
+function WeightLostInPoundsIn30Minutes($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return KilosToPounds(WeightLostInKilosIn30Minutes($METvalue, $weightInKilos));
+}
+
+function WeightLostInPoundsIn60Minutes($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return KilosToPounds(WeightLostInKilosIn60Minutes($METvalue, $weightInKilos));
+}
+
+function WeightLostInPoundsInCustomTime($METvalue, $weightInPounds, $minutes) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return KilosToPounds(WeightLostInKilosInCustomTime($METvalue, $weightInKilos, $minutes));
+}
+
+// Calories burned for weight in pounds
+function CaloriesBurnedIn15MinutesLb($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return CaloriesBurnedIn15Minutes($METvalue, $weightInKilos);
+}
+
+function CaloriesBurnedIn30MinutesLb($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return CaloriesBurnedIn30Minutes($METvalue, $weightInKilos);
+}
+
+function CaloriesBurnedIn60MinutesLb($METvalue, $weightInPounds) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return CaloriesBurnedIn60Minutes($METvalue, $weightInKilos);
+}
+
+function CaloriesBurnedInCustomTimeLb($METvalue, $weightInPounds, $minutes) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return CaloriesBurnedInCustomTime($METvalue, $weightInKilos, $minutes);
+}
+
+// BMI calculator for pounds
+function BMICalculatorWeightInPounds($weightInPounds, $height) {
+    $weightInKilos = PoundsToKilos($weightInPounds);
+    return BMICalculator($weightInKilos, $height);
+}
+
+// Online API Integration
+function KilosToPoundsWebService($weightInKilos) {
+    $apiKey = 'YOUR_API_KEY'; // Replace with your RapidAPI key
+    $url = "https://unit-converter.p.rapidapi.com/convert?from=kg&to=lb&value=" . urlencode($weightInKilos);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "X-RapidAPI-Key: $apiKey",
+        "X-RapidAPI-Host: unit-converter.p.rapidapi.com"
+    ]);
+
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        curl_close($ch);
+        return KilosToPounds($weightInKilos); // Fallback
+    }
+
+    curl_close($ch);
+    $data = json_decode($response, true);
+    return isset($data['result']) ? round(floatval($data['result']), 2) : KilosToPounds($weightInKilos);
+}
+
+function PoundsToKilosWebService($weightInPounds) {
+    $apiKey = 'YOUR_API_KEY'; // Replace with your RapidAPI key
+    $url = "https://unit-converter.p.rapidapi.com/convert?from=lb&to=kg&value=" . urlencode($weightInPounds);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "X-RapidAPI-Key: $apiKey",
+        "X-RapidAPI-Host: unit-converter.p.rapidapi.com"
+    ]);
+
+    $response = curl_exec($ch);
+    if (curl_errno($ch)) {
+        curl_close($ch);
+        return PoundsToKilos($weightInPounds); // Fallback
+    }
+
+    curl_close($ch);
+    $data = json_decode($response, true);
+    return isset($data['result']) ? round(floatval($data['result']), 2) : PoundsToKilos($weightInPounds);
+}
+
+function BMICalculatorWebService($weightInKilos, $height) {
+    // Simulated for now; replace with a real BMI API if available
+    return BMICalculator($weightInKilos, $height);
+}
 ?>

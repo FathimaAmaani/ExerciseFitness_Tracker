@@ -10,9 +10,11 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $activity = $_POST['activity'];
+    $duration = $_POST['duration'] === 'custom' ? floatval($_POST['custom_duration']) : floatval($_POST['duration']);
+    
     // Find MET value for the activity
     $METvalue = 0;
-    foreach ($ListofActivities as $act) {
+    foreach ($_SESSION['listOfActivities'] as $act) {
         if ($act['Activity'] == $activity) {
             $METvalue = $act['METvalue'];
             break;
@@ -22,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "Activity not found.";
         exit;
     }
+
     // Load current weight
     $defaultData = LoadDefaultData();
     if (count($defaultData) < 2) {
@@ -29,13 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
     $startWeight = floatval($defaultData[1]);
-    // Calculate calories burned and weight lost for 30 minutes
-    $caloriesBurned = CaloriesBurnedIn30Minutes($METvalue, $startWeight);
+    $units = $_SESSION['units'];
 
-    // Calculate weight lost in kilos for 30 minutes
-    $weightLost = WeightLostInKilosIn30Minutes($caloriesBurned, $startWeight);
-    $duration = 30;
-    $units = 'KG';
+    // Calculate calories burned and weight lost based on duration
+    $caloriesBurned = ($units == "KG") ?
+        CaloriesBurnedInCustomTime($METvalue, $startWeight, $duration) :
+        CaloriesBurnedInCustomTimeLb($METvalue, $startWeight, $duration);
+    $weightLost = ($units == "KG") ?
+        WeightLostInKilosInCustomTime($METvalue, $startWeight, $duration) :
+        WeightLostInPoundsInCustomTime($METvalue, $startWeight, $duration);
+
     // Save the activity record
     if (AddNewActivityRecord($activity, $duration, $caloriesBurned, $weightLost, $units)) {
         header('Location: main.php');
@@ -54,23 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Record Activity - Fitness Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar {
-            background-color: #007bff;
-        }
-        .navbar-brand, .nav-link {
-            color: white !important;
-        }
-        .btn-custom {
-            background-color: #28a745;
-            border-color: #28a745;
-        }
-        .btn-custom:hover {
-            background-color: #218838;
-            border-color: #218838;
-        }
+        body { background-color: #f8f9fa; }
+        .navbar { background-color: #007bff; }
+        .navbar-brand, .nav-link { color: white !important; }
+        .btn-custom { background-color: #28a745; border-color: #28a745; }
+        .btn-custom:hover { background-color: #218838; border-color: #218838; }
     </style>
 </head>
 <body>
@@ -104,15 +98,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-3">
                 <label for="activity" class="form-label">Select Activity</label>
                 <select class="form-select" id="activity" name="activity" required>
-                    <?php foreach ($ListofActivities as $act): ?>
+                    <?php foreach ($_SESSION['listOfActivities'] as $act): ?>
                         <option value="<?php echo $act['Activity']; ?>"><?php echo $act['Activity']; ?></option>
                     <?php endforeach; ?>
                 </select>
+            </div>
+            <div class="mb-3">
+                <label for="duration" class="form-label">Duration (minutes)</label>
+                <select class="form-select" id="duration" name="duration" onchange="toggleCustom(this)">
+                    <option value="15">15</option>
+                    <option value="30" selected>30</option>
+                    <option value="60">60</option>
+                    <option value="custom">Custom</option>
+                </select>
+                <input type="number" class="form-control mt-2" id="custom_duration" name="custom_duration" placeholder="Enter custom minutes" style="display:none;" min="1">
             </div>
             <button type="submit" class="btn btn-custom text-white">Record</button>
             <a href="main.php" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
+    <script>
+        function toggleCustom(select) {
+            document.getElementById('custom_duration').style.display = select.value == 'custom' ? 'block' : 'none';
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
