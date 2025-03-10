@@ -35,18 +35,21 @@ function LoadDefaultData() {
 function InsertNewUserData($height, $weight, $bmi, $units) {
     $file = __DIR__ . '/ExerciseData.txt';
     if (!file_exists($file)) {
-        return false;
+        // Create new file with headers if it doesn't exist
+        $initialContent = "START_HEIGHT, START_WEIGHT, START_BMI, UNITS\n$height, $weight, $bmi, $units\nACTIVITY, DURATION, CALORIES_BURNED, WEIGHT_LOST, UNITS\n";
+        return file_put_contents($file, $initialContent) !== false;
     }
-    $lines = file($file, FILE_IGNORE_NEW_LINES);
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     if (count($lines) < 2) {
         return false;
     }
+    // Update user data line (line 2)
     $lines[1] = "$height, $weight, $bmi, $units";
-    if (file_put_contents($file, implode("\n", $lines)) !== false) {
-        return true;
-    } else {
-        return false;
+    // Ensure the file ends with a newline after the activity header
+    if (count($lines) == 2) {
+        $lines[] = "ACTIVITY, DURATION, CALORIES_BURNED, WEIGHT_LOST, UNITS";
     }
+    return file_put_contents($file, implode("\n", $lines) . "\n") !== false;
 }
 
 // Function to add a new activity record to ExerciseData.txt
@@ -87,17 +90,17 @@ function LoadActivityRecords() {
     if (!file_exists($file)) {
         return [];
     }
-    $lines = file($file, FILE_IGNORE_NEW_LINES);
-    if (count($lines) < 4) {
+    $lines = file($file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (count($lines) < 3) {
         return [];
     }
-    // Line 3 is activity headers, so activity records start from line 4
+    // Activity records start from line 4 (index 3)
     $activityRecords = array_slice($lines, 3);
-    // Remove any empty lines
+    // Filter out invalid records
     $activityRecords = array_filter($activityRecords, function($line) {
-        return trim($line) != '';
+        $parts = explode(", ", trim($line));
+        return count($parts) == 5 && $parts[0] !== "ACTIVITY"; // Ensure 5 fields and not the header
     });
     return $activityRecords;
 }
-
 ?>

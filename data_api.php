@@ -1,6 +1,6 @@
 <?php
 // data_api.php
-include 'fileio.php';
+
 include 'common.php';
 
 function GetMetValueForActivity($search) {
@@ -13,44 +13,71 @@ function GetMetValueForActivity($search) {
     return 0;
 }
 
-function CalculateAverageCalories($activityData) {
-    $total = 0;
-    $count = 0;
-    foreach ($activityData as $line) {
-        $parts = explode(", ", trim($line));
-        if (count($parts) == 5) {
-            $total += floatval($parts[2]);
-            $count++;
-        }
+
+if (!defined('DATA_API_PHP_INCLUDED')) {
+    define('DATA_API_PHP_INCLUDED', true);
+
+    // Add a new activity to the session list
+    function AddNewActivity($activityName, $metValue) {
+        $_SESSION['listOfActivities'][] = array(
+            'Activity' => $activityName,
+            'METvalue' => $metValue
+        );
     }
-    return $count ? round($total / $count, 2) : 0;
+
+    // Calculate average calories burned from activity data
+    function CalculateAverageCalories($activityData) {
+        if (empty($activityData)) {
+            return 0;
+        }
+        $totalCalories = 0;
+        $count = 0;
+        foreach ($activityData as $line) {
+            $parts = explode(", ", trim($line));
+            if (count($parts) >= 5) { // Ensure valid record
+                $totalCalories += floatval($parts[2]); // caloriesBurned is 3rd field
+                $count++;
+            }
+        }
+        return $count > 0 ? round($totalCalories / $count, 2) : 0;
+    }
+
+    // Calculate the largest calories burned in a single activity
+    function CalculateLargestCalories($activityData) {
+        if (empty($activityData)) {
+            return 0;
+        }
+        $maxCalories = 0;
+        foreach ($activityData as $line) {
+            $parts = explode(", ", trim($line));
+            if (count($parts) >= 5) {
+                $calories = floatval($parts[2]);
+                $maxCalories = max($maxCalories, $calories);
+            }
+        }
+        return round($maxCalories, 2);
+    }
+
+    // Calculate the biggest weight loss interval (largest single weight loss)
+    function CalculateBiggestWeightLossInterval($activityData) {
+        if (empty($activityData)) {
+            return 0;
+        }
+        $biggestWeightLoss = 0;
+        foreach ($activityData as $line) {
+            $parts = explode(", ", trim($line));
+            if (count($parts) == 5) {
+                $weightLost = floatval($parts[3]);
+                $recordUnits = trim($parts[4]);
+                // Convert weight loss to KG for consistent comparison
+                $weightLostKg = ($recordUnits == "KG") ? $weightLost : PoundsToKilos($weightLost);
+                if ($weightLostKg > $biggestWeightLoss) {
+                    $biggestWeightLoss = $weightLostKg;
+                }
+            }
+        }
+        return $biggestWeightLoss; // Return value in KG
+    }
 }
 
-function CalculateLargestCalories($activityData) {
-    $max = 0;
-    foreach ($activityData as $line) {
-        $parts = explode(", ", trim($line));
-        if (count($parts) == 5) {
-            $max = max($max, floatval($parts[2]));
-        }
-    }
-    return $max;
-}
-
-function CalculateBiggestWeightLossInterval($activityData) {
-    $maxDiff = 0;
-    for ($i = 1; $i < count($activityData); $i++) {
-        $prev = explode(", ", trim($activityData[$i - 1]));
-        $curr = explode(", ", trim($activityData[$i]));
-        if (count($prev) == 5 && count($curr) == 5) {
-            $diff = abs(floatval($prev[3]) - floatval($curr[3]));
-            $maxDiff = max($maxDiff, $diff);
-        }
-    }
-    return round($maxDiff, 2);
-}
-
-function AddNewActivity($activity, $met) {
-    $_SESSION['listOfActivities'][] = ["Activity" => $activity, "METvalue" => floatval($met)];
-}
 ?>

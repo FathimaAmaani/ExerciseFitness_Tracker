@@ -23,56 +23,160 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Menu - Fitness Tracker</title>
+    <title>Activity Log - Fitness Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
-        body {
-            background-color: #f8f9fa;
+        body { 
+            background-color: #f0f8ff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        .navbar {
-            background-color: #007bff;
+        .navbar { 
+            background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        .navbar-brand, .nav-link {
-            color: white !important;
+        .navbar-brand, .nav-link { 
+            color: white !important; 
+            font-weight: 500;
+            transition: all 0.3s ease;
         }
-        .btn-custom {
-            background-color: #28a745;
-            border-color: #28a745;
+        .nav-link:hover {
+            transform: translateY(-2px);
+            color: #f0f0f0 !important;
         }
-        .btn-custom:hover {
-            background-color: #218838;
-            border-color: #218838;
+        .btn-custom { 
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover { 
+            background: linear-gradient(135deg, #218838, #1aa179);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+        }
+        .list-group-item { 
+            background-color: #ffffff;
+            border-left: 4px solid #0d6efd;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .table {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .table thead {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .container {
+            padding-bottom: 40px;
+        }
+        h1, h3 {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .btn {
+            border-radius: 5px;
+            padding: 8px 20px;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="main.php">Fitness Tracker</a>
+            <a class="navbar-brand" href="main.php">
+                <i class="bi bi-heart-pulse-fill me-2"></i>Fitness Tracker
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="enter_data.php">Enter/Update Data</a>
+                        <a class="nav-link" href="enter_data.php">
+                            <i class="bi bi-pencil-square me-1"></i> Enter Data
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="record_activity.php">Record Activity</a>
+                        <a class="nav-link" href="record_activity.php">
+                            <i class="bi bi-activity me-1"></i> Record Activity
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="view_log.php">View Log</a>
+                        <a class="nav-link" href="view_log.php">
+                            <i class="bi bi-journal-text me-1"></i> View Log
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
+                        <a class="nav-link" href="logout.php">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
                     </li>
                 </ul>
             </div>
         </div>
     </nav>
-    <div class="container mt-5 text-center">
-        <h1>Welcome to Your Fitness Dashboard</h1>
-        <p class="lead">Use the navigation bar above to manage your fitness journey.</p>
+    <div class="container mt-5">
+        <div class="card p-4 mb-5">
+            <h1 class="text-center mb-4">
+                <i class="bi bi-speedometer2 me-2"></i>Your Fitness Dashboard
+            </h1>
+            <p class="lead text-center mb-5">Track your fitness journey and achieve your health goals</p>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-pencil-square text-primary" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">Enter Data</h5>
+                            <p class="card-text">Update your height and weight measurements</p>
+                            <a href="enter_data.php" class="btn btn-outline-primary mt-2">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Go
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-activity text-danger" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">Record Activity</h5>
+                            <p class="card-text">Log your fitness activities and workouts</p>
+                            <a href="record_activity.php" class="btn btn-outline-danger mt-2">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Go
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="bi bi-journal-text text-success" style="font-size: 3rem;"></i>
+                            <h5 class="card-title mt-3">View Log</h5>
+                            <p class="card-text">Check your progress and activity history</p>
+                            <a href="view_log.php" class="btn btn-outline-success mt-2">
+                                <i class="bi bi-arrow-right-circle me-1"></i> Go
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
