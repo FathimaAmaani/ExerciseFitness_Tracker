@@ -128,5 +128,10 @@ if (!defined('COMMON_PHP_INCLUDED')) {
         // 1 pound = 0.45359237 kilograms
         return round($pounds * 0.45359237, 2);
     }
+
+    function FeetInchesToMeters($feet, $inches) {
+        $totalInches = ($feet * 12) + $inches;
+        return round($totalInches * 0.0254, 2);
+    }
 }
 ?>

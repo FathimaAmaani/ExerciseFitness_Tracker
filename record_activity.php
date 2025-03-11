@@ -141,6 +141,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             padding: 8px 20px;
             font-weight: 500;
         }
+
+        .footer {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    color: white;
+    padding: 30px 0;
+    margin-top: 50px;
+    border-radius: 20px 20px 0 0;
+}
+.footer h5 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.footer a {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.footer a:hover {
+    text-decoration: underline;
+    opacity: 0.9;
+}
+.footer ul li {
+    margin-bottom: 10px;
+}
+.footer hr {
+    border-color: rgba(255,255,255,0.2);
+    margin: 20px 0;
+}
+.footer .bi {
+    margin-right: 5px;
+}
     </style>
 </head>
 <body>
@@ -189,11 +220,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <label for="activity" class="form-label">
                         <i class="bi bi-list-check me-1"></i> Select Activity
                     </label>
-                    <select class="form-select" id="activity" name="activity" required>
-                        <?php foreach ($_SESSION['listOfActivities'] as $act): ?>
-                            <option value="<?php echo $act['Activity']; ?>"><?php echo $act['Activity']; ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                    <div class="input-group">
+                        <select class="form-select" id="activity" name="activity" required>
+                            <?php foreach ($_SESSION['listOfActivities'] as $act): ?>
+                                <option value="<?php echo $act['Activity']; ?>"><?php echo $act['Activity']; ?> (MET: <?php echo $act['METvalue']; ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                        <a href="add_activity.php" class="btn btn-outline-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Add New
+                        </a>
+                    </div>
+                    <div class="form-text">
+                        <i class="bi bi-info-circle me-1"></i> Don't see your activity? Click "Add New" to add more activities.
+                    </div>
                 </div>
                 <div class="mb-4">
                     <label for="duration" class="form-label">
@@ -218,6 +257,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </form>
         </div>
     </div>
+    <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="bi bi-heart-pulse-fill me-2"></i>Fitness Tracker</h5>
+                <p>Your companion for a healthier lifestyle. Track activities, monitor progress, and achieve your fitness goals.</p>
+            </div>
+            <div class="col-md-3">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.php"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li><a href="main.php"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li><a href="view_log.php"><i class="bi bi-journal-text me-1"></i>Activity Log</a></li>
+                    <li><a href="record_activity.php"><i class="bi bi-activity me-1"></i>Record Activity</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-envelope me-1"></i>support@fitnesstracker.com</li>
+                    <li><i class="bi bi-telephone me-1"></i>+1 (555) 123-4567</li>
+                    <li><i class="bi bi-geo-alt me-1"></i>123 Fitness Street, Health City</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="mt-4 mb-4">
+        <div class="text-center">
+            <p class="mb-0">&copy; <?php echo date('Y'); ?> Fitness Tracker. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
     <script>
         function toggleCustom(select) {
             document.getElementById('custom_duration').style.display = select.value == 'custom' ? 'block' : 'none';

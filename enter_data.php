@@ -27,14 +27,30 @@ if (isset($_POST['set_units'])) {
 // Handle data submission
 $error = ''; // To store validation errors
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
-    $height = trim($_POST['height']);
+    $heightUnit = $_POST['height_unit'];
     $weight = trim($_POST['weight']);
 
-    // Validate height (in meters)
-    if (empty($height) || !is_numeric($height)) {
-        $error = "Height must be a valid number.";
-    } elseif ($height <= 0.5 || $height >= 2.5) {
-        $error = "Height must be between 0.5m and 2.5m.";
+    // Process height based on selected unit
+    if ($heightUnit === 'meters') {
+        $height = trim($_POST['height_m']);
+        // Validate height in meters
+        if (empty($height) || !is_numeric($height)) {
+            $error = "Height must be a valid number.";
+        } elseif ($height <= 0.5 || $height >= 2.5) {
+            $error = "Height must be between 0.5m and 2.5m.";
+        }
+        $height = floatval($height);
+    } else {
+        $feet = trim($_POST['height_ft']);
+        $inches = trim($_POST['height_in']);
+        // Validate feet and inches
+        if (!is_numeric($feet) || !is_numeric($inches) || $feet < 0 || $inches < 0) {
+            $error = "Feet and inches must be non-negative numbers.";
+        } elseif ($feet > 8 || $inches >= 12) {
+            $error = "Feet must be between 0 and 8, and inches between 0 and 11.99.";
+        } else {
+            $height = FeetInchesToMeters(floatval($feet), floatval($inches));
+        }
     }
 
     // Validate weight
@@ -49,7 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
     }
 
     if (empty($error)) {
-        $height = floatval($height);
         $weight = floatval($weight);
         // Convert weight to KG for BMI API if in LBS
         $weightInKg = ($_SESSION['units'] == "LBS") ? PoundsToKilos($weight) : $weight;
@@ -70,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Log - Fitness Tracker</title>
+    <title>Enter/Update Data - Fitness Tracker</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
@@ -141,6 +156,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
             padding: 8px 20px;
             font-weight: 500;
         }
+
+        .footer {
+    background: linear-gradient(135deg, #0d6efd, #0dcaf0);
+    color: white;
+    padding: 30px 0;
+    margin-top: 50px;
+    border-radius: 20px 20px 0 0;
+}
+.footer h5 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+.footer a {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+.footer a:hover {
+    text-decoration: underline;
+    opacity: 0.9;
+}
+.footer ul li {
+    margin-bottom: 10px;
+}
+.footer hr {
+    border-color: rgba(255,255,255,0.2);
+    margin: 20px 0;
+}
+.footer .bi {
+    margin-right: 5px;
+}
     </style>
 </head>
 <body>
@@ -196,10 +242,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
                     <input type="hidden" name="set_units" value="1">
                 </div>
                 <div class="mb-4">
-                    <label for="height" class="form-label">
-                        <i class="bi bi-rulers me-1"></i> Height (m)
+                    <label for="height_unit" class="form-label">
+                        <i class="bi bi-rulers me-1"></i> Height Unit
                     </label>
-                    <input type="number" step="0.01" class="form-control" id="height" name="height" value="<?php echo htmlspecialchars($startHeight); ?>" required>
+                    <select class="form-select" id="height_unit" name="height_unit" onchange="toggleHeightInput(this)">
+                        <option value="meters">Meters</option>
+                        <option value="feet_inches">Feet & Inches</option>
+                    </select>
+                </div>
+                <div class="mb-4" id="height_meters">
+                    <label for="height_m" class="form-label">
+                        <i class="bi bi-rulers me-1"></i> Height (meters)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="height_m" name="height_m" value="<?php echo htmlspecialchars($startHeight); ?>" required>
+                </div>
+                <div class="mb-4" id="height_feet_inches" style="display:none;">
+                    <label for="height_ft" class="form-label">
+                        <i class="bi bi-rulers me-1"></i> Height (feet)
+                    </label>
+                    <input type="number" class="form-control" id="height_ft" name="height_ft" placeholder="Feet" min="0">
+                    <label for="height_in" class="form-label mt-2">
+                        <i class="bi bi-rulers me-1"></i> Height (inches)
+                    </label>
+                    <input type="number" step="0.01" class="form-control" id="height_in" name="height_in" placeholder="Inches" min="0">
                 </div>
                 <div class="mb-4">
                     <label for="weight" class="form-label">
@@ -218,6 +283,51 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save'])) {
             </form>
         </div>
     </div>
+    <footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h5><i class="bi bi-heart-pulse-fill me-2"></i>Fitness Tracker</h5>
+                <p>Your companion for a healthier lifestyle. Track activities, monitor progress, and achieve your fitness goals.</p>
+            </div>
+            <div class="col-md-3">
+                <h5>Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="index.php"><i class="bi bi-house-door me-1"></i>Home</a></li>
+                    <li><a href="main.php"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a></li>
+                    <li><a href="view_log.php"><i class="bi bi-journal-text me-1"></i>Activity Log</a></li>
+                    <li><a href="record_activity.php"><i class="bi bi-activity me-1"></i>Record Activity</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h5>Contact</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-envelope me-1"></i>support@fitnesstracker.com</li>
+                    <li><i class="bi bi-telephone me-1"></i>+1 (555) 123-4567</li>
+                    <li><i class="bi bi-geo-alt me-1"></i>123 Fitness Street, Health City</li>
+                </ul>
+            </div>
+        </div>
+        <hr class="mt-4 mb-4">
+        <div class="text-center">
+            <p class="mb-0">&copy; <?php echo date('Y'); ?> Fitness Tracker. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+    <script>
+        function toggleHeightInput(select) {
+            const metersDiv = document.getElementById('height_meters');
+            const feetInchesDiv = document.getElementById('height_feet_inches');
+            if (select.value === 'meters') {
+                metersDiv.style.display = 'block';
+                feetInchesDiv.style.display = 'none';
+            } else {
+                metersDiv.style.display = 'none';
+                feetInchesDiv.style.display = 'block';
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
